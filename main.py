@@ -13,23 +13,25 @@ from src.views import get_card_info, get_top_transactions, greetings, sort_by_da
 setup_logging()
 logger = logging.getLogger('external_api')
 
-
 def views_main(date: str) -> str:
     """
     Функция, принимающая на вход строку с датой и временем
-    в формате YYYY-MM-DD HH:MM:SS и возвращающая JSON-ответ
+    в формате YYYY-MM-DD HH:MM:SS и возвращающая JSON-ответ.
     """
     actual_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     correct_date = actual_date.strftime("%d.%m.%Y")
     correct_time = actual_date.strftime("%H:%M:%S")
 
+    operations_list, df = get_xlsx(EXCEL_PATH)
     sort_operations_list = sort_by_date(operations_list, correct_date)
 
-    greeting = greetings(correct_time)
+    greeting = greetings()
     cards = get_card_info(sort_operations_list)
     top_transactions = get_top_transactions(sort_operations_list)
-    currency_rates = [get_currency_rate(cur) for cur in get_json_currencies(JSON_PATH)]
-    stock_prices = [get_stock_price(st) for st in get_json_stocks(JSON_PATH)]
+    with open(JSON_PATH, 'r', encoding='utf-8') as f:
+        user_json = json.load(f)
+    currency_rates = [get_currency_rate(cur) for cur in get_json_currencies(user_json)]
+    stock_prices = [get_stock_price(st) for st in get_json_stocks(user_json)]
 
     result = {
         "greeting": greeting,
@@ -40,9 +42,7 @@ def views_main(date: str) -> str:
     }
 
     parsed_result = json.dumps(result, ensure_ascii=False)
-
     return parsed_result
-
 
 if __name__ == "__main__":
     operations_list, df = get_xlsx(EXCEL_PATH)

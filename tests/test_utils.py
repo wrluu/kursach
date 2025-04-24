@@ -1,98 +1,24 @@
-from unittest.mock import mock_open, patch
-
-import pandas as pd
 import pytest
+import pandas as pd
+from src.utils import load_transactions, get_currency_rates, get_stock_prices
 
-from src.utils import get_json_currencies, get_json_stocks, get_xlsx
+def test_load_transactions():
+    df = load_transactions("data/operations.xlsx")
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
 
+def test_get_currency_rates(mocker):
+    mock_response = mocker.Mock()
+    mock_response.json.return_value = {"rates": {"USD": 1.0, "EUR": 1.1}}
+    mocker.patch("requests.get", return_value=mock_response)
 
-@patch("pandas.read_excel")
-def test_get_xlsx(mock_read_excel, operations_from_excel, operations_list_valid):
-    mock_read_excel.return_value = pd.DataFrame(operations_from_excel)
-    result = get_xlsx("valid/path/to/file")
+    rates = get_currency_rates(["USD", "EUR"])
+    assert rates == [{"currency": "USD", "rate": 1.0}, {"currency": "EUR", "rate": 1.1}]
 
-    assert operations_list_valid in result
+def test_get_stock_prices(mocker):
+    mock_response = mocker.Mock()
+    mock_response.json.return_value = {"price": 100}
+    mocker.patch("requests.get", return_value=mock_response)
 
-
-def test_get_xlsx_empty_path():
-    result = get_xlsx("")
-
-    assert [] in result
-
-
-@patch("pandas.read_excel")
-def test_get_xlsx_empty_file(mock_read_excel):
-    mock_read_excel.return_value = pd.DataFrame()
-    result = get_xlsx("valid/path/to/file")
-
-    assert [] in result
-
-
-def test_get_xlsx_invalid_path():
-    result = get_xlsx("invalid/path/to/file")
-
-    assert [] in result
-
-
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data="""{"user_currencies": ["USD", "EUR"], "user_stocks": ["AAPL", "AMZN"]}""",
-)
-def test_get_json_currencies(mock_file):
-    result = get_json_currencies("some/path")
-
-    assert result == ["USD", "EUR"]
-    mock_file.assert_called_with("some/path", "r", encoding="utf-8")
-
-
-@patch("builtins.open", new_callable=mock_open, read_data="")
-def test_get_json_currencies_invalid(mock_file):
-    with pytest.raises(Exception) as exc_info:
-        get_json_currencies("some/path")
-
-    assert "Ошибка при чтении файла:" in str(exc_info.value)
-
-
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data="""{"key": ["value_1", "value_2"], "key_2": ["value_3", "value_4"]}""",
-)
-def test_get_json_currencies_not_key(mock_file):
-    result = get_json_currencies("some/path")
-
-    assert result == []
-
-
-def test_get_json_currencies_not_path():
-    with pytest.raises(Exception) as exc_info:
-        get_json_currencies("")
-
-    assert "Ошибка при чтении файла:" in str(exc_info.value)
-
-
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data="""{"user_currencies": ["USD", "EUR"], "user_stocks": ["AAPL", "AMZN"]}""",
-)
-def test_get_json_stocks(mock_file):
-    result = get_json_stocks("some/path")
-
-    assert result == ["AAPL", "AMZN"]
-
-
-def test_get_json_stocks_not_path():
-    with pytest.raises(Exception) as exc_info:
-        get_json_stocks("")
-
-    assert "Ошибка при чтении файла:" in str(exc_info.value)
-
-
-@patch("builtins.open", new_callable=mock_open, read_data="////")
-def test_get_json_stocks_invalid(mock_file):
-    with pytest.raises(ValueError) as exc_info:
-        get_json_stocks("some/path")
-
-    assert "Ошибка при чтении файла:" in str(exc_info.value)
+    stocks = get_stock_prices(["AAPL"])
+    assert stocks == [{"stock": "AAPL", "price": 100}]

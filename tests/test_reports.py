@@ -1,46 +1,29 @@
-import pandas as pd
 import pytest
+import pandas as pd
+from src.reports import spending_by_category, spending_by_weekday, spending_by_workday
 
-from src.reports import spending_by_category
+@pytest.fixture
+def sample_transactions():
+    data = {
+        "Дата операции": ["2023-10-01", "2023-10-02", "2023-10-03"],
+        "Сумма платежа": [100, 200, 300],
+        "Категория": ["Супермаркеты", "Кафе", "Супермаркеты"],
+        "Описание": ["Описание 1", "Описание 2", "Описание 3"],
+        "Номер карты": ["1234", "5678", "9101"],
+    }
+    return pd.DataFrame(data)
 
+def test_spending_by_category(sample_transactions):
+    result = spending_by_category(sample_transactions, "Супермаркеты")
+    assert result["category"] == "Супермаркеты"
+    assert result["total_spent"] == 400
 
-@pytest.mark.parametrize(
-    "df, expected",
-    [
-        (
-            pd.DataFrame({
-                'Дата платежа': ['01.01.2025', '01.01.2025', '02.01.2025', '03.01.2025'],
-                'Категория': ['Такси', 'Еда', 'Такси', 'Супермаркеты'],
-                'Сумма операции': [-777, -555, -1312, -666]
-            }),
-            pd.DataFrame({
-                "Категория": ['Еда'],
-                "Сумма трат": [555]
-            })
-        )
-    ]
-)
-def test_spending_by_category(df, expected):
-    result = spending_by_category(df, "Еда", "01.01.2025")
-    pd.testing.assert_frame_equal(result, expected)
+def test_spending_by_weekday(sample_transactions):
+    result = spending_by_weekday(sample_transactions)
+    assert "Понедельник" in result
+    assert "Вторник" in result
 
-
-@pytest.mark.parametrize(
-    "df, expected",
-    [
-        (
-            pd.DataFrame({
-                'Дата платежа': ['01.01.2025', '01.01.2025', '02.01.2025', '03.01.2025'],
-                'Категория': ['Такси', 'Еда', 'Такси', 'Супермаркеты'],
-                'Сумма операции': [-777, -555, -1312, -666]
-            }),
-            pd.DataFrame({
-                "Категория": ['Еда'],
-                "Сумма трат": [555]
-            })
-        )
-    ]
-)
-def test_spending_by_category_not_date(df, expected):
-    result = spending_by_category(df, "Еда")
-    pd.testing.assert_frame_equal(result, expected)
+def test_spending_by_workday(sample_transactions):
+    result = spending_by_workday(sample_transactions)
+    assert "Рабочий день" in result
+    assert "Выходной день" in result

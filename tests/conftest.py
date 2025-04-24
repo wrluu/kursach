@@ -1,6 +1,5 @@
 import pytest
 
-
 @pytest.fixture
 def operations_from_excel():
     return {
@@ -64,7 +63,6 @@ def operations_from_excel():
         "Округление на инвесткопилку": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "Сумма операции с округлением": [500.0, 858.0, 858.0, 260.0, 1000.0, 1000.0, 1000.0, 59.0, 59.0, 130.0],
     }
-
 
 @pytest.fixture
 def operations_list_valid():
@@ -241,7 +239,6 @@ def operations_list_valid():
         },
     ]
 
-
 @pytest.fixture
 def list_sorted_by_date():
     return [
@@ -366,13 +363,11 @@ def list_sorted_by_date():
         },
     ]
 
-
 @pytest.fixture
 def card_info_result():
     return [
         {"last_digits": "6158", "total_spent": 1248.00, "cashback": 12.48},
     ]
-
 
 @pytest.fixture
 def operations_list_invalid():
@@ -430,7 +425,6 @@ def operations_list_invalid():
         },
     ]
 
-
 @pytest.fixture
 def top_5_operations():
     return [
@@ -439,7 +433,6 @@ def top_5_operations():
         {"date": "05.04.2022", "amount": 260.0, "category": "Супермаркеты", "description": "WILDBERRIES"},
         {"date": "03.04.2022", "amount": 130.0, "category": "Такси", "description": "Ситимобил"},
     ]
-
 
 @pytest.fixture
 def result_of_currency_rate():
@@ -459,7 +452,6 @@ def result_of_currency_rate():
   "success": true
 }"""
 
-
 @pytest.fixture
 def result_of_currency_rate_without_result():
     return """{
@@ -477,7 +469,6 @@ def result_of_currency_rate_without_result():
   "result": "",
   "success": true
 }"""
-
 
 @pytest.fixture
 def result_of_stocks():
@@ -511,14 +502,12 @@ def result_of_stocks():
   "status": "OK",
   "ticker": "AAPL"}"""
 
-
 @pytest.fixture
 def result_of_stocks_failed():
     return (
         '{"ticker": "GOOGL", "queryCount": 0, "resultsCount": 0, "adjusted": true, '
         '"status": "DELAYED", "request_id": "0222db913d482bdd764ab88d7a4e5a92"}'
     )
-
 
 @pytest.fixture
 def result_cashback_categories():
