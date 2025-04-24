@@ -3,6 +3,7 @@ import logging.config
 
 from settings import LOG_PATH
 
+
 log_dir = LOG_PATH.parent
 if not log_dir.exists():
     log_dir.mkdir(parents=True, exist_ok=True)
